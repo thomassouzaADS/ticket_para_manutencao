@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:sec="http://www.w3.org/1999/xhtml" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8">
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <meta content="Thomas Souza" name="author">
+  <link href="/img/logo.png" rel="shortcut icon" type="image/x-icon"/>
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" rel="stylesheet"/>
+  <link href="/css/padrao.css" rel="stylesheet"/>
+  <title>Listar Manutenção</title>
+</head>
+<body>
+<nav class="navbar navbar-dark bg-dark fixed-top p-2">
+  <div class="container-fluid">
+    <a class="navbar-brand">Listar Manutenção</a>
+    <button aria-controls="offcanvasNavbar" class="navbar-toggler ml-auto custom-toggler"
+            data-bs-target="#offcanvasNavbar"
+            data-bs-toggle="offcanvas" type="button">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div aria-labelledby="offcanvasNavbarLabel" class="offcanvas offcanvas-end" id="offcanvasNavbar" tabindex="-1">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" sec:authorize="hasAuthority('USER')">REQUERENTE</h5>
+        <h5 class="offcanvas-title" sec:authorize="hasAuthority('ADMIN')">ADMINISTRADOR</h5>
+        <h5 class="offcanvas-title" sec:authorize="hasAuthority('ATENDENTE')">ATENDENTE</h5>
+        <h5 class="offcanvas-title" sec:authorize="hasAuthority('MANUTENCAO')">RESPONSÁVEL MANUTENÇÃO</h5>
+        <button aria-label="Close" class="btn-close text-reset" data-bs-dismiss="offcanvas"
+                type="button"></button>
+      </div>
+      <div class="offcanvas-body bg-dark">
+        <ul class="navbar-nav navbar-dark bg-dark justify-content-end flex-grow-1 pe-3">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="/home">Página Inicial</a>
+
+            <!--SOMENTE USER-->
+            <a aria-current="page" class="nav-link active" href="/ticket/cadastrar_ticket"
+               sec:authorize="hasAuthority('USER')">Cadastrar Ticket</a>
+            <a aria-current="page" class="nav-link active" href="/ticket/listar_ticket"
+               sec:authorize="hasAuthority('USER')">Listar Ticket</a>
+
+            <!--SOMENTE ATENDENTE-->
+            <a aria-current="page" class="nav-link active" href="/ticket/verificar_ticket"
+               sec:authorize="hasAuthority('ATENDENTE')">Tickets em Andamento</a>
+            <a aria-current="page" class="nav-link active" href="/ticket/ticket_atendente"
+               sec:authorize="hasAuthority('ATENDENTE')">Tickets Selecionados</a>
+
+            <!--SOMENTE MANUTENCAO-->
+            <a aria-current="page" class="nav-link active" href="/manutencao/verificar_manutencao"
+               sec:authorize="hasAuthority('MANUTENCAO')">Manutenções em Andamento</a>
+            <a aria-current="page" class="nav-link active" href="/manutencao/ticket_manutencao"
+               sec:authorize="hasAuthority('MANUTENCAO')">Manutenções Selecionadas</a>
+
+            <!--SOMENTE ADMIN-->
+            <a aria-current="page" class="nav-link active" href="/usuario/cadastrar_usuario"
+               sec:authorize="hasAuthority('ADMIN')">Cadastrar Usuário</a>
+            <a aria-current="page" class="nav-link active" href="/usuario/listar_usuario"
+               sec:authorize="hasAuthority('ADMIN')">Listar Usuários</a>
+            <a class="nav-link active" aria-current="page" href="/usuario/alterar_senha">Alterar Senha</a>
+          </li>
+          <li class="nav-item mt-5">
+            <a class="btn btn-danger" href="/logout">Sair</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>
+<div class="container">
+  <!--    Mensagem de Erro-->
+  <div>
+    <div class="alert alert-danger" th:if="${errorMessage}" th:utext="${errorMessage}">
+    </div>
+  </div>
+  <div>
+    <form action="/manutencao/busca_manutencao" class="pb-2 d-flex"
+          method="POST" novalidate>
+      <ul class="navbar-nav me-auto mb-2 mb-md-0">
+      </ul>
+      <input class="custom-input me-2" id="texto" name="texto" placeholder="Busca" type="text"/>
+      <button class="btn btn-primary me-1" type="submit">Buscar</button>
+      <a class="btn btn-secondary me-1" href="/manutencao/ticket_manutencao" role="button">Mostrar Todos</a>
+      <a class="btn btn-warning" href="/home" role="button">Voltar</a>
+    </form>
+  </div>
+  <table class="table">
+    <thead class="table-dark">
+    <tr>
+      <th hidden scope="col">ID Manutencao</th>
+      <th scope="col">ID Ticket</th>
+      <th scope="col">Título</th>
+      <th scope="col">Data Solicitação</th>
+      <th scope="col">Status Manutenção</th>
+      <th scope="col">Solicitante</th>
+      <th scope="col">Empresa</th>
+      <th scope="col">Cidade</th>
+      <th scope="col">Estado</th>
+      <th scope="col">Visualizar</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="manutencao : ${manutencoes}">
+      <td hidden th:text="${manutencao.idManutencao}" name="idManutencao" id="idManutencao"></td>
+      <td th:text="${manutencao.ticket.idTicket}" name="idTicket" id="idTicket"></td>
+      <td th:text="${manutencao.ticket.titulo}"></td>
+      <td th:text="${#dates.format(manutencao.ticket.dataSolicitacao, 'dd-MM-yyyy')}"
+          th:value="${manutencao.ticket.dataSolicitacao}"></td>
+      <td th:text="${manutencao.statusManutencao}"></td>
+      <td th:text="${manutencao.ticket.usuario.nomeUsuario}"></td>
+      <td th:text="${manutencao.usuario.empresa}"></td>
+      <td th:text="${manutencao.usuario.cidade}"></td>
+      <td th:text="${manutencao.usuario.estado}"></td>
+      <td><a class="btn btn-primary"
+             th:href="@{/manutencao/view_manutencao_selecionado/{idManutencao}(idManutencao=${manutencao.idManutencao})}">Visualizar</a>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+<script src="/js/javascript.js"></script>
+<script crossorigin="anonymous"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

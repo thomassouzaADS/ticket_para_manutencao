@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:sec="http://www.w3.org/1999/xhtml" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta content='width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no'
+          name="viewport">
+    <meta content="Thomas Souza" name="author">
+    <link href="/img/logo.png" rel="shortcut icon" type="image/x-icon"/>
+    <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" rel="stylesheet"/>
+    <link href="/css/padrao.css" rel="stylesheet"/>
+    <title>Manutenção</title>
+</head>
+<body>
+<div class="container-cadastro">
+    <nav class="navbar navbar-dark bg-dark fixed-top p-2">
+        <div class="container-fluid">
+            <a class="navbar-brand">Manutenção</a>
+            <button aria-controls="offcanvasNavbar" class="navbar-toggler ml-auto custom-toggler" data-bs-target="#offcanvasNavbar"
+                    data-bs-toggle="offcanvas" type="button">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div aria-labelledby="offcanvasNavbarLabel" class="offcanvas offcanvas-end" id="offcanvasNavbar"
+                 tabindex="-1">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title" sec:authorize="hasAuthority('USER')">REQUERENTE</h5>
+                    <h5 class="offcanvas-title" sec:authorize="hasAuthority('ADMIN')">ADMINISTRADOR</h5>
+                    <h5 class="offcanvas-title" sec:authorize="hasAuthority('ATENDENTE')">ATENDENTE</h5>
+                    <h5 class="offcanvas-title" sec:authorize="hasAuthority('MANUTENCAO')">RESPONSÁVEL MANUTENÇÃO</h5>
+                    <button aria-label="Close" class="btn-close text-reset" data-bs-dismiss="offcanvas"
+                            type="button"></button>
+                </div>
+                <div class="offcanvas-body bg-dark">
+                    <ul class="navbar-nav navbar-dark bg-dark justify-content-end flex-grow-1 pe-3">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="/home">Página Inicial</a>
+
+                            <!--SOMENTE USER-->
+                            <a aria-current="page" class="nav-link active" href="/ticket/cadastrar_ticket"
+                               sec:authorize="hasAuthority('USER')">Cadastrar Ticket</a>
+                            <a aria-current="page" class="nav-link active" href="/ticket/listar_ticket"
+                               sec:authorize="hasAuthority('USER')">Listar Ticket</a>
+
+                            <!--SOMENTE ATENDENTE-->
+                            <a aria-current="page" class="nav-link active" href="/ticket/verificar_ticket"
+                               sec:authorize="hasAuthority('ATENDENTE')">Tickets em Andamento</a>
+                            <a aria-current="page" class="nav-link active" href="/ticket/ticket_atendente"
+                               sec:authorize="hasAuthority('ATENDENTE')">Tickets Selecionados</a>
+
+                            <!--SOMENTE MANUTENCAO-->
+                            <a aria-current="page" class="nav-link active" href="/manutencao/verificar_manutencao"
+                               sec:authorize="hasAuthority('MANUTENCAO')">Manutenções em Andamento</a>
+                            <a aria-current="page" class="nav-link active" href="/manutencao/ticket_manutencao"
+                               sec:authorize="hasAuthority('MANUTENCAO')">Manutenções Selecionadas</a>
+
+                            <!--SOMENTE ADMIN-->
+                            <a aria-current="page" class="nav-link active" href="/usuario/cadastrar_usuario"
+                               sec:authorize="hasAuthority('ADMIN')">Cadastrar Usuário</a>
+                            <a aria-current="page" class="nav-link active" href="/usuario/listar_usuario"
+                               sec:authorize="hasAuthority('ADMIN')">Listar Usuários</a>
+                            <a class="nav-link active" aria-current="page" href="/usuario/alterar_senha">Alterar Senha</a>
+                        </li>
+                        <li class="nav-item mt-5">
+                            <a class="btn btn-danger" href="/logout">Sair</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-cadastro">
+        <form class="form-signin row p-3 g-3 mr-sm-2"
+              method="POST"
+              th:action="@{/manutencao/add_comentario/{idTicket}(idTicket=${manutencao.ticket.idTicket})}">
+            <div>
+                <div class="alert alert-danger" th:if="${errorMessage}" th:utext="${errorMessage}">
+                </div>
+            </div>
+            <div class="col-md-6 vticket" th:each="manutencao : ${manutencao}">
+                <h5 style="text-align:center">Informações Ticket</h5><br>
+
+                <div hidden>
+                    <b hidden>ID Manutencao: </b><input class="form-label"
+                                                        th:value="${manutencao.idManutencao}"
+                                                        name="idManutencao" id="idManutencao" hidden/><br>
+
+                    <b hidden>ID Ticket: </b><input class="form-label"
+                                                    th:value="${manutencao.ticket.idTicket}"
+                                                    name="idTicket" id="idTicket" hidden/><br>
+                </div>
+                <b>Título: </b><label class="form-label"
+                                      th:text="${manutencao.ticket.titulo}"></label><br>
+                <b>Descrição do ticket: </b><label class="form-label"
+                                                   th:text="${manutencao.ticket.descricao}"></label><br>
+                <b>Status Ticket: </b><label class="form-label"
+                                             th:text="${manutencao.ticket.statusTicket}"></label><br>
+                <b>Nome Requerente: </b><label class="form-label"
+                                               th:text="${manutencao.ticket.usuario.nomeUsuario}"></label><br>
+                <b>Telefone Requerente: </b><label class="form-label"
+                                                   th:text="${manutencao.ticket.usuario.telefone}"></label><br>
+                <b>E-mail Requerente: </b><label class="form-label"
+                                                 th:text="${manutencao.ticket.usuario.email}"></label><br>
+                <b>Empresa Requerente: </b><label class="form-label"
+                                                  th:text="${manutencao.ticket.usuario.empresa}"></label><br>
+                <b>Cidade Requerente: </b><label class="form-label"
+                                                 th:text="${manutencao.ticket.usuario.cidade}"></label><br>
+                <b>Estado Requerente: </b><label class="form-label"
+                                                 th:text="${manutencao.ticket.usuario.estado}"></label><br>
+                <div class="vbutton">
+                    <a class="btn btn-danger" th:href="@{/manutencao/licitacao/{idManutencao}(idManutencao=${manutencao.idManutencao})}"
+                       role="button" sec:authorize="hasAuthority('MANUTENCAO')">Aguardando Licitação</a>
+                    <a class="btn btn-success" th:href="@{/manutencao/finalizar/{idManutencao}(idManutencao=${manutencao.idManutencao})}"
+                       role="button" sec:authorize="hasAuthority('MANUTENCAO')">Finalizar Manutenção</a>
+                    <a class="btn btn-warning" href="/manutencao/ticket_manutencao" role="button"
+                       sec:authorize="hasAuthority('MANUTENCAO')">Voltar</a>
+                </div>
+
+            </div>
+            <div class="col-md-6">
+                <h5 style="text-align:center; margin-bottom: 5%">Comentários</h5>
+                <div class="be-comment-block">
+                    <div class="be-comment">
+                        <div class="be-comment-content"  th:each="comentario : ${comentarios}">
+                            <span class="be-comment-name">
+                                <a th:text="${comentario.emailUsuarioComentario}"></a>
+                            </span>
+                            <p class="be-comment-text" th:text="${comentario.comentario}">
+                            </p><br>
+                        </div>
+                    </div>
+                    <form class="form-block">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div class="form-group">
+                                    <textarea class="form-input" placeholder="Comentário" id="comentario" name="comentario"
+                                              type="text" required=""></textarea>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary pull-right" style="margin-left: 10px; width:96%;"
+                                    type="submit">Enviar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script src="/js/javascript.js"></script>
+<script crossorigin="anonymous"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
